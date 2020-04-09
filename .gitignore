@@ -132,3 +132,4 @@ dmypy.json
 crawls/
 *.seen
 dataset_html/
+*.sql
