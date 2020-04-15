@@ -21,7 +21,7 @@ df_itch = df_itch[df_itch["game_desc_len"] > 150]         # Remove games with < 
 df_itch = df_itch[df_itch["game_language"] == "English"]  # Only keep English games
 df_itch = df_itch.reset_index()
 
-df_itch = df_itch.copy()[:50] # For testing
+# df_itch = df_itch.copy()[:50] # For testing
 
 # Columns to retained
 column_used = ["game_desc", "game_genres", "game_tags", "game_name", "game_url"]
@@ -52,7 +52,8 @@ def extract_keywords_from_description(df):
         # assigning the key words to the new column for the corresponding movie
         df.at[index, 'keywords'] = [stemmer.stem(keyword)                                 # Perform stemming on keywords
                                         for keyword in list(key_words_dict_scores.keys()) 
-                                        if re.match(r'[^\W\d]*$', keyword)]               # Remove nonalphabetical characters
+                                        if re.match(r'[^\W\d]*$', keyword)                # Remove nonalphabetical characters
+                                        and not re.match(r'^_+$', keyword)]               # Remove words with only "_"
 
 # extract_keywords_from_description(df_itch)  # for debugging
 # extract_keywords_from_description(df_steam)  # for debugging
@@ -92,27 +93,34 @@ df_merge['soup'] = df_merge.apply(create_soup, axis=1)
 
 # Reverse index, ie. get game index by name
 indices = pd.Series(df_merge.index, index=df_merge['game_name']).drop_duplicates()
+# Reverse index, wrt game_url
+indices_game_url = pd.Series(df_merge.index, index=df_merge['game_url']).drop_duplicates()
+
 
 # Create document vectors
 count = CountVectorizer(analyzer='word', ngram_range=(1, 2), 
                         min_df=0, max_df=0.50, 
                         stop_words='english')
-# count = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), min_df=0, stop_words='english')
+# count = HashingVectorizer(analyzer='word', ngram_range=(1, 2),
+#                           stop_words='english')                       
+# count = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), 
+#                         min_df=0, max_df=0.50, 
+#                         stop_words='english')
 
 count_matrix = count.fit_transform(df_merge['soup'])
 
 # Calculate cosine similarity
-# cosine_sim = linear_kernel(count_matrix, count_matrix)        # Used when TfidfVectorizer is used
-cosine_sim = cosine_similarity(count_matrix, count_matrix)              # Used when CountVectorizer is used
+# cosine_sim_tfidf = linear_kernel(count_matrix, count_matrix)           # Used when TfidfVectorizer is used
+cosine_sim = cosine_similarity(count_matrix, count_matrix)      # Used when CountVectorizer is used
 
 
 # Recommend game based on a game_name
-def get_recommendations(game_name, cosine_sim):
+def get_recommendations_on_name(game_name, cosine_sim, top_n):
     # Get the index of the movie that matches the title
-    idx = indices[game_name]
+    it_game_idx = indices[game_name]
 
     # Get the pairwsie similarity scores of all movies with that movie
-    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = list(enumerate(cosine_sim[it_game_idx]))
 
     # Obtain only the similarity to Steam games
     sim_scores = sim_scores[len(df_itch):]
@@ -120,20 +128,105 @@ def get_recommendations(game_name, cosine_sim):
     # Sort the movies based on the similarity scores
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
 
-    # Get the scores of the 10 most similar movies
-    sim_scores = sim_scores[0:11]
+    # Get the scores of the top n most similar movies
+    sim_scores = sim_scores[0:top_n+1]
 
-    # Get the movie indices
-    movie_indices = [i[0] for i in sim_scores]
+    # Get the Steam game indices
+    st_game_indices = [i[0] for i in sim_scores]
 
     # Return the top 10 most similar movies
-    return df_merge['game_name'].iloc[movie_indices]
+    # return df_merge['game_name'].iloc[movie_indices]
 
-def get_recommendations2(game_name, cosine_sim, top_n):
-    idx = indices[game_name]
+    results = pd.DataFrame({"itch_game"        : game_name,
+                            "itch_game_url"    : df_merge['game_url'].iloc[it_game_idx],
+                            "steam_game"       : [df_merge['game_name'].iloc[st_game_idx] for st_game_idx in st_game_indices],
+                            "steam_game_index" : st_game_indices,
+                            "steam_game_url"   : [df_merge['game_url'].iloc[st_game_idx] for st_game_idx in st_game_indices],
+                            "sim_scores"       : [x[1] for x in sim_scores]
+                           })
+    return results
 
-    # Get a list of tuples (sim_score, name, url) 
-    similar_indices = cosine_sim[idx].argsort()[:-top_n-2:-1]
-    sim_scores2 = [(cosine_sim[idx][i], df_itch['game_name'][i], df_itch["game_url"][i]) for i in similar_indices]
 
-    return sim_scores2
+# def get_recommendations2(game_name, cosine_sim, top_n):
+#     idx = indices[game_name]
+
+#     # Get a list of tuples (sim_score, name, url) 
+#     similar_indices = cosine_sim[idx].argsort()[:-top_n-1:-1]
+#     sim_scores2 = [(cosine_sim[idx][i], df_itch['game_name'][i], df_itch["game_url"][i]) for i in similar_indices]
+
+#     return sim_scores2
+
+# Recommend game based on a game_url
+def get_recommendations_on_url(game_url, cosine_sim, top_n):
+    # Get the index of the movie that matches the title
+    it_game_idx = indices_game_url[game_url]
+
+    # Get the pairwsie similarity scores of all movies with that movie
+    sim_scores = list(enumerate(cosine_sim[it_game_idx]))
+
+    # Obtain only the similarity to Steam games
+    sim_scores = sim_scores[len(df_itch):]
+
+    # Sort the movies based on the similarity scores
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Get the scores of the top n most similar movies
+    sim_scores = sim_scores[0:top_n]
+
+    # Get the Steam game indices
+    st_game_indices = [i[0] for i in sim_scores]
+
+    # Return the top 10 most similar movies
+    # return df_merge['game_name'].iloc[movie_indices]
+
+    results = pd.DataFrame({"itch_game"        : df_merge['game_name'].iloc[it_game_idx],
+                            "itch_game_url"    : game_url,
+                            "steam_game"       : [df_merge['game_name'].iloc[st_game_idx] for st_game_idx in st_game_indices],
+                            "steam_game_index" : st_game_indices,
+                            "steam_game_url"   : [df_merge['game_url'].iloc[st_game_idx] for st_game_idx in st_game_indices],
+                            "sim_scores"       : [x[1] for x in sim_scores]
+                           })
+    return results
+
+
+def get_recommendation_all_itch_games(cosine_sim, top_n):
+    all_itch_game_url = df_itch["game_url"].tolist()
+
+    df_result = pd.DataFrame()
+
+    for it_game_url in all_itch_game_url:
+        # print(itch_game)
+        batch = get_recommendations_on_url(it_game_url, cosine_sim, top_n)
+        # Conccatenate itch and steam df
+        df_result = pd.concat([df_result, batch], ignore_index=True)
+
+    return df_result
+
+
+df_result = get_recommendation_all_itch_games(cosine_sim, 10)
+# Save temporary df_merge to file
+output = "../dataset/df_recommendation_all.csv"
+if os.path.exists(output):
+    os.remove(output)
+df_result.to_csv(output, encoding='utf-8-sig', index=False)
+
+
+
+import pymysql
+def save_to_database(df_results):
+    
+    # Connect to the database
+    connection = pymysql.connect(host='localhost', db='gamerecs',
+                                user='root', password='evermore9')
+    # create cursor
+    cursor=connection.cursor()
+    cols = "`,`".join([str(i) for i in df_results.columns.tolist()])
+
+    for i,row in df_results.iterrows():
+        sql = "INSERT INTO `toprecs` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
+        cursor.execute(sql, tuple(row))
+
+        # the connection is not autocommitted by default, so we must commit to save our changes
+        connection.commit()
+
+save_to_database(df_result)
