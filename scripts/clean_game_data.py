@@ -16,19 +16,26 @@ df_itch = pd.read_csv('../dataset/game_details_raw.csv')
 # df_steam = pd.read_csv('../dataset/top_100_steam_game_details_raw.csv')
 df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw.csv')
 
+# Data filtering
 df_itch.dropna(subset=['game_developers'], inplace=True)  # Remove games without developers
 df_itch = df_itch[df_itch["game_desc_len"] > 150]         # Remove games with < 150 characters in description length (1st quartile)
 df_itch = df_itch[df_itch["game_language"] == "English"]  # Only keep English games
+df_itch.fillna(value={"game_no_ratings" : 0}, inplace=True)
+df_itch = df_itch[df_itch["game_no_ratings"] > 4]         # Keep games with at least 5 ratings, for ease of computation
+                                                          # and for survey
+
 df_itch = df_itch.reset_index()
 
 # df_itch = df_itch.copy()[:50] # For testing
+df_itch_num_ratings = df_itch[["game_name", "game_url", "game_no_ratings"]]
+
 
 # Columns to retained
 column_used = ["game_desc", "game_genres", "game_tags", "game_name", "game_url"]
 df_itch = df_itch[column_used]
 df_steam = df_steam[column_used]
 
-# Conccatenate itch and steam df
+# Concatenate itch and steam df
 df_merge = pd.concat([df_itch, df_steam], ignore_index=True)
 
 # Extract keywords from description
@@ -202,13 +209,20 @@ def get_recommendation_all_itch_games(cosine_sim, top_n):
 
     return df_result
 
+# Get all top 10 Steam recommendations for each Itch games
+top_n = 5
+df_result = get_recommendation_all_itch_games(cosine_sim, top_n)
 
-df_result = get_recommendation_all_itch_games(cosine_sim, 10)
+# Merge with num ratings
+df_final = df_result.merge(df_itch_num_ratings, left_on="itch_game_url", right_on="game_url")
+df_final["row_id"] = df_final.index
+df_final["itch_game_url"] = "https://" + df_final["itch_game_url"]
+
 # Save temporary df_merge to file
-output = "../dataset/df_recommendation_all.csv"
+output = "../dataset/df_" + str(top_n) + "_recommendation_all.csv"
 if os.path.exists(output):
     os.remove(output)
-df_result.to_csv(output, encoding='utf-8-sig', index=False)
+df_final.to_csv(output, encoding='utf-8-sig', index=False)
 
 
 
