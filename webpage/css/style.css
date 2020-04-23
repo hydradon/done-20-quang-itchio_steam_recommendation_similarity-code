@@ -1,0 +1,22 @@
+body {
+  padding-top: 1%;
+}
+
+#title {
+  font: 2em sans-serif;
+  text-align: center;
+}
+
+table a:link,
+a:visited {
+  text-decoration: none;
+}
+
+table a:hover,
+a:active {  
+  text-decoration: underline;
+}
+
+.SearchBar {
+  margin-left: 0.5em;
+}
