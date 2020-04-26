@@ -1,35 +1,18 @@
-var column_names = [
-	'Itch game',
-	'Itch game url',
-	'Steam game',
-	'Steam game url'
-];
 //  itch_game,itch_game_url,steam_game,steam_game_index,steam_game_url,sim_scores
 
 // draw the table
-
-var table = d3.select(".table");
-table.append('thead').attr('class', 'thead-dark').append('tr');
-
-var headers = table
-	.select('tr')
-	.selectAll('th')
-	.data(column_names)
-	.enter()
-	.append('th')
-	.text(function (d) {
-		return d;
-	});
+var table = d3.select('.table');
 
 var rows,
 	row_entries,
 	row_entries_no_anchor,
 	row_entries_with_anchor,
 	steam_row;
+
 var dataset;
-// d3.csv('./data.csv', function (data) {
+
 d3.csv('./data/df_5_recommendation_all.csv', function (data) {
-	// d3.json('./data.json', function (data) {
+// d3.csv('./data/df_recommendation_all.csv', function (data) {
 	// loading data from server
 	dataset = data;
 	// draw table body with rows
@@ -42,7 +25,6 @@ d3.csv('./data/df_5_recommendation_all.csv', function (data) {
 		.data(data, function (d) {
 			return d.row_id;
 		});
-	// .data(data);
 
 	// enter the rows
 	rows.enter().append('tr');
@@ -100,7 +82,6 @@ d3.csv('./data/df_5_recommendation_all.csv', function (data) {
 			return get_steam_widget_url(d);
 		})
 		.attr('class', 'steam_iframe')
-		// .attr('target', '_blank')
 		.text(function (d) {
 			return d;
 		});
@@ -141,7 +122,6 @@ d3.csv('./data/df_5_recommendation_all.csv', function (data) {
 			.data(searched_data, function (d) {
 				return d.row_id;
 			});
-		// .data(searched_data);
 
 		// enter the rows
 		rows.enter().append('tr');

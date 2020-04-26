@@ -16,3 +16,8 @@ class SteamgamedetailsItem(scrapy.Item):
     game_genres = scrapy.Field()
     game_desc_snippet = scrapy.Field()
     game_desc = scrapy.Field()
+
+
+class ImageItem(scrapy.Item):
+    image_urls = scrapy.Field()
+    image_name = scrapy.Field()
