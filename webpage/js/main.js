@@ -1,4 +1,5 @@
 //  itch_game,itch_game_url,steam_game,steam_game_index,steam_game_url,sim_scores
+// itch_game,itch_game_url,steam_game,steam_game_index,steam_game_url,sim_scores,game_desc_snippet,game_no_ratings,row_id
 
 // draw the table
 var table = d3.select('.table');
@@ -11,7 +12,7 @@ var rows,
 
 var dataset;
 
-d3.csv('./data/df_5_recommendation_all.csv', function (data) {
+d3.csv('./data/df_5_recommendation_all_short.csv', function (data) {
 // d3.csv('./data/df_recommendation_all.csv', function (data) {
 	// loading data from server
 	dataset = data;
@@ -39,7 +40,7 @@ d3.csv('./data/df_5_recommendation_all.csv', function (data) {
 					arr.push(d[k]);
 				}
 			}
-			return [arr[0], arr[1], arr[2], arr[4]];
+			return [arr[0], arr[1], arr[2], arr[4], arr[6]];
 		})
 		.enter()
 		.append('td');
@@ -76,12 +77,21 @@ d3.csv('./data/df_5_recommendation_all.csv', function (data) {
 			/https?:\/\/.*steam.*/.test(d) == true
 		);
 	});
+	// steam_row
+	// 	.append('iframe')
+	// 	.attr('src', function (d) {
+	// 		return get_steam_widget_url(d);
+	// 	})
+	// 	.attr('class', 'steam_iframe')
+	// 	.text(function (d) {
+	// 		return d;
+	// 	});
+
 	steam_row
-		.append('iframe')
+		.append("img")
 		.attr('src', function (d) {
-			return get_steam_widget_url(d);
+			return get_steam_img_loc(d);
 		})
-		.attr('class', 'steam_iframe')
 		.text(function (d) {
 			return d;
 		});
@@ -195,4 +205,10 @@ function get_steam_widget_url(steam_url) {
 	// Sample https://store.steampowered.com/app/519860/DUSK
 	var app_id = steam_url.split('/')[4];
 	return '//store.steampowered.com/widget/' + app_id;
+}
+
+
+function get_steam_img_loc(steam_url) {
+	var app_id = steam_url.split('/')[4];
+	return  "../dataset_imgs_steam/" + app_id + ".jpg";
 }

@@ -18,7 +18,7 @@ df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw.csv')
 
 # Data filtering
 df_itch.dropna(subset=['game_developers'], inplace=True)  # Remove games without developers
-df_itch = df_itch[df_itch["game_desc_len"] > 150]         # Remove games with < 150 characters in description length (1st quartile)
+df_itch = df_itch[df_itch["game_desc_len"] > 150]         # Remove games with <= 150 characters in description length (1st quartile)
 df_itch = df_itch[df_itch["game_language"] == "English"]  # Only keep English games
 df_itch.fillna(value={"game_no_ratings" : 0}, inplace=True)
 df_itch = df_itch[df_itch["game_no_ratings"] > 4]         # Keep games with at least 5 ratings, for ease of computation
@@ -27,7 +27,8 @@ df_itch = df_itch[df_itch["game_no_ratings"] > 4]         # Keep games with at l
 df_itch = df_itch.reset_index()
 
 # df_itch = df_itch.copy()[:50] # For testing
-df_itch_num_ratings = df_itch[["game_name", "game_url", "game_no_ratings"]]
+df_itch_num_ratings = df_itch[["game_name", "game_url", "game_no_ratings"]]     # Keep num ratings for itch
+df_steam_short_desc = df_steam[["game_name", "game_url", "game_desc_snippet"]]  # Keep Steam game desc for display on page
 
 
 # Columns to retained
@@ -213,11 +214,19 @@ def get_recommendation_all_itch_games(cosine_sim, top_n):
 top_n = 5
 df_result = get_recommendation_all_itch_games(cosine_sim, top_n)
 
+# Attach Steam game short desc
+df_final = df_result.merge(df_steam_short_desc, left_on="steam_game_url", right_on="game_url")
+df_final.drop(["game_name", "game_url"], inplace=True, axis=1) # drop redundant Steam game_name and game_url
+
 # Merge with num ratings
-df_final = df_result.merge(df_itch_num_ratings, left_on="itch_game_url", right_on="game_url")
+df_final = df_final.merge(df_itch_num_ratings, left_on="itch_game_url", right_on="game_url")
+df_final.drop(["game_name", "game_url"], inplace=True, axis=1) # drop redundant itch game_name and game_url
+
+df_final["sim_scores"] = df_final["sim_scores"].map('{:,.5f}'.format) # Format the contribution to 4 decimal places
 df_final["row_id"] = df_final.index
 df_final["itch_game_url"] = "https://" + df_final["itch_game_url"]
 
+df_final.sort_values(by=['itch_game', 'sim_scores'], ascending=[True, False], inplace=True)
 # Save temporary df_merge to file
 output = "../dataset/df_" + str(top_n) + "_recommendation_all.csv"
 if os.path.exists(output):
