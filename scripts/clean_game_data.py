@@ -225,6 +225,7 @@ df_final.drop(["game_name", "game_url"], inplace=True, axis=1) # drop redundant 
 df_final["sim_scores"] = df_final["sim_scores"].map('{:,.5f}'.format) # Format the contribution to 4 decimal places
 df_final["row_id"] = df_final.index
 df_final["itch_game_url"] = "https://" + df_final["itch_game_url"]
+df_final["game_desc_snippet"] = df_final["game_desc_snippet"].fillna("")
 
 df_final.sort_values(by=['itch_game', 'sim_scores'], ascending=[True, False], inplace=True)
 # Save temporary df_merge to file
