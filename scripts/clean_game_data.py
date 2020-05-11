@@ -67,12 +67,6 @@ def extract_keywords_from_description(df):
 # extract_keywords_from_description(df_steam)  # for debugging
 extract_keywords_from_description(df_merge)
 
-# Save temporary df_merge to file
-output = "../dataset/df_merge_temp.csv"
-if os.path.exists(output):
-    os.remove(output)
-df_merge.to_csv(output, encoding='utf-8-sig', index=False)
-
 # process genres and tags columns
 def clean_data(x):
     return [str.lower(i.replace(" ", "")) for i in x]
@@ -88,6 +82,11 @@ column_list = ["game_genres", "game_tags"]
 # clean_columns(column_list, df_steam)
 clean_columns(column_list, df_merge)
 
+# Save temporary df_merge to file
+output = "../dataset/df_merge_temp.csv"
+if os.path.exists(output):
+    os.remove(output)
+df_merge.to_csv(output, encoding='utf-8-sig', index=False)
 
 # Create a soup column of genres, tags, and keywords
 def create_soup(x):
@@ -166,19 +165,19 @@ def get_recommendations_on_name(game_name, cosine_sim, top_n):
 
 # Recommend game based on a game_url
 def get_recommendations_on_url(game_url, cosine_sim, top_n):
-    # Get the index of the movie that matches the title
+    # Get the index of the Itch game that matches the title
     it_game_idx = indices_game_url[game_url]
 
-    # Get the pairwsie similarity scores of all movies with that movie
+    # Get the pairwise similarity scores of all games with that Itch game
     sim_scores = list(enumerate(cosine_sim[it_game_idx]))
 
     # Obtain only the similarity to Steam games
     sim_scores = sim_scores[len(df_itch):]
 
-    # Sort the movies based on the similarity scores
+    # Sort the Steam games based on the similarity scores
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
 
-    # Get the scores of the top n most similar movies
+    # Get the scores of the top n most similar Steam games
     sim_scores = sim_scores[0:top_n]
 
     # Get the Steam game indices
