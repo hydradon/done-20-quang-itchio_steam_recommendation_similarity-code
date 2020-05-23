@@ -68,3 +68,14 @@ class TagItem(scrapy.Item):
     related_tags = scrapy.Field()
     related_tags_url = scrapy.Field()
     game_count = scrapy.Field()
+
+
+class DevContactItem(scrapy.Item):
+    game_developers_url = scrapy.Field()
+    profile_link = scrapy.Field()
+    other_links = scrapy.Field()
+    twitter_links = scrapy.Field()
+    main_twitter_link = scrapy.Field()
+    facebook_links = scrapy.Field()
+    discord_links = scrapy.Field()
+    emails = scrapy.Field()

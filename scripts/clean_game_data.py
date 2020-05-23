@@ -14,7 +14,8 @@ stemmer = SnowballStemmer("english", ignore_stopwords=True)
 # Read itch and steam game data
 df_itch = pd.read_csv('../dataset/game_details_raw.csv')
 # df_steam = pd.read_csv('../dataset/top_100_steam_game_details_raw.csv')
-df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw.csv')
+# df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw.csv')
+df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw_no_DLC.csv')
 
 # Data filtering
 df_itch.dropna(subset=['game_developers'], inplace=True)  # Remove games without developers
@@ -252,4 +253,4 @@ def save_to_database(df_results):
         # the connection is not autocommitted by default, so we must commit to save our changes
         connection.commit()
 
-save_to_database(df_result)
+save_to_database(df_final)
