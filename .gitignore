@@ -133,5 +133,4 @@ crawls/
 *.seen
 dataset_html/
 dataset_html_steam/
-*.sql
 dataset/game_details_raw.csv
