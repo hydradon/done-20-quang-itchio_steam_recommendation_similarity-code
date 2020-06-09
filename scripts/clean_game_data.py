@@ -13,7 +13,6 @@ stemmer = SnowballStemmer("english", ignore_stopwords=True)
 
 # Read itch and steam game data
 df_itch = pd.read_csv('../dataset/game_details_raw.csv')
-# df_steam = pd.read_csv('../dataset/top_100_steam_game_details_raw.csv')
 # df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw.csv')
 df_steam = pd.read_csv('../dataset/top_500_steam_sellers_details_raw_no_DLC.csv')
 
@@ -222,14 +221,14 @@ df_final.drop(["game_name", "game_url"], inplace=True, axis=1) # drop redundant 
 df_final = df_final.merge(df_itch_num_ratings, left_on="itch_game_url", right_on="game_url")
 df_final.drop(["game_name", "game_url"], inplace=True, axis=1) # drop redundant itch game_name and game_url
 
-df_final["sim_scores"] = df_final["sim_scores"].map('{:,.5f}'.format) # Format the contribution to 4 decimal places
+df_final["sim_scores"] = df_final["sim_scores"].map('{:,.9f}'.format) # Format the contribution to 9 decimal places
 df_final["row_id"] = df_final.index
 df_final["itch_game_url"] = "https://" + df_final["itch_game_url"]
 df_final["game_desc_snippet"] = df_final["game_desc_snippet"].fillna("")
 
-df_final.sort_values(by=['itch_game', 'sim_scores'], ascending=[True, False], inplace=True)
+df_final.sort_values(by=['itch_game', 'sim_scores', 'row_id'], ascending=[True, False, True], inplace=True)
 # Save temporary df_merge to file
-output = "../dataset/df_" + str(top_n) + "_recommendation_all.csv"
+output = "../dataset/df_" + str(top_n) + "_recommendation_all_9dp.csv"
 if os.path.exists(output):
     os.remove(output)
 df_final.to_csv(output, encoding='utf-8-sig', index=False)
@@ -237,20 +236,20 @@ df_final.to_csv(output, encoding='utf-8-sig', index=False)
 
 
 import pymysql
-def save_to_database(df_results):
+def save_to_database(df_results, table):
     
     # Connect to the database
     connection = pymysql.connect(host='localhost', db='gamerecs',
-                                user='root', password='evermore9')
+                                 user='root', password='evermore9')
     # create cursor
     cursor=connection.cursor()
     cols = "`,`".join([str(i) for i in df_results.columns.tolist()])
 
     for i,row in df_results.iterrows():
-        sql = "INSERT INTO `toprecs` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
+        sql = "INSERT INTO `" + table + "` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
         cursor.execute(sql, tuple(row))
 
         # the connection is not autocommitted by default, so we must commit to save our changes
         connection.commit()
 
-save_to_database(df_final)
+save_to_database(df_final, "toprecs")

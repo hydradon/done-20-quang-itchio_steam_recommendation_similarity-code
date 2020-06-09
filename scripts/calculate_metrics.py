@@ -4,7 +4,6 @@ import os
 
 
 df_ratings = pd.read_csv("../dataset/ratings_result.csv")
-df_similarity_scores = pd.read_csv("../dataset/df_5_recommendation_all.csv")
 
 # NOTE P@K
 def precision_at_k(vote_array) -> []:
@@ -30,9 +29,7 @@ def ave_precision_at_k(vote_array, precision_array) -> []:
 
 # this calculate precision at k for each itch_game, df_input is all rec voting of 1 itch game
 def calculate_precision_at_k(df_input) -> {}:
-    df_input.sort_values(by=['sim_scores', 'u_id', 'timestamp', 'is_upvote'], 
-                        ascending=[False, True, True, False], inplace=True)
-
+    
     all_voters = df_input["u_id"].drop_duplicates().tolist()
 
     array_of_precision_at_k_aray = [] # size = number of voter, each element is an array of votes for 5 recs
@@ -40,6 +37,8 @@ def calculate_precision_at_k(df_input) -> {}:
 
     for voter in all_voters: # processing for each voter
         voter_votes = df_input[df_input["u_id"] == voter]
+        voter_votes.sort_values(by=['sim_scores', 'row_id', 'timestamp'], 
+                                ascending=[False, True, True], inplace=True)
 
         # Only keep the latest vote based on timestamp for each rec vote
         voter_votes.drop_duplicates('steam_game_url', keep='last', inplace=True) # NOTE reset_index(drop=True) ?
@@ -66,8 +65,6 @@ all_precision = {}
 for itch_game in all_itch_games:
     # Extract all voting for a game
     df_voting = df_ratings[df_ratings["itch_game_url"] == itch_game]
-
-    # TODO resolve recommendation where 2 sim scores are equal
     all_precision[itch_game] = calculate_precision_at_k(df_voting)
 
 df_result = pd.DataFrame.from_dict(all_precision, orient='index').rename_axis('itch_game_url').reset_index()
