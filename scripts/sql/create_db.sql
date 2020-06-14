@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS `rec_ratings`
     `steam_game_url` VARCHAR(255),
     `is_upvote` BOOLEAN,
     `feedback` TEXT,
-    `u_id` INT,
+    `overall_feedback` TEXT,
+    `u_id` VARCHAR(64),
     `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `rec_ratings`
 CREATE TABLE IF NOT EXISTS `dev_twitter_uid`
 (
 	`main_twitter_link` VARCHAR(255),
-    `uid` INT
+    `uid` VARCHAR(64) NOT NULL UNIQUE
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
@@ -41,5 +42,5 @@ CREATE TABLE IF NOT EXISTS `game_twitter_devs`
 	`game_name` VARCHAR(255),
 	`game_url` VARCHAR(255),
     `main_twitter_link` VARCHAR(255),
-    `uid` INT
+    `uid` VARCHAR(64)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

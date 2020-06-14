@@ -21,7 +21,7 @@ def ave_precision_at_k(vote_array, precision_array) -> []:
     ap_sum = 0
     ap_res = []
     for i, p, v in zip(range(len(precision_array)), precision_array, vote_array):
-        ap_sum += (p * v)
+        ap_sum += (p * float(v))
         ap_res.append(ap_sum/float(i+1))
 
     return ap_res

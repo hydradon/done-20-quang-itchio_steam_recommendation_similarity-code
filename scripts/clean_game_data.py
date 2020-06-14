@@ -35,6 +35,7 @@ df_steam_short_desc = df_steam[["game_name", "game_url", "game_desc_snippet"]]  
 column_used = ["game_desc", "game_genres", "game_tags", "game_name", "game_url"]
 df_itch = df_itch[column_used]
 df_steam = df_steam[column_used]
+df_steam["game_genres"].str.replace("rpg", "roleplaying")
 
 # Concatenate itch and steam df
 df_merge = pd.concat([df_itch, df_steam], ignore_index=True)
@@ -83,7 +84,7 @@ column_list = ["game_genres", "game_tags"]
 clean_columns(column_list, df_merge)
 
 # Save temporary df_merge to file
-output = "../dataset/df_merge_temp.csv"
+output = "../dataset/df_merge_temp_temp.csv"
 if os.path.exists(output):
     os.remove(output)
 df_merge.to_csv(output, encoding='utf-8-sig', index=False)
@@ -105,12 +106,12 @@ indices_game_url = pd.Series(df_merge.index, index=df_merge['game_url']).drop_du
 
 
 # Create document vectors
-count = CountVectorizer(analyzer='word', ngram_range=(1, 2), 
+count = CountVectorizer(analyzer='word', ngram_range=(1, 1), 
                         min_df=0, max_df=0.50, 
                         stop_words='english')
-# count = HashingVectorizer(analyzer='word', ngram_range=(1, 2),
+# count = HashingVectorizer(analyzer='word', ngram_range=(1, 1),
 #                           stop_words='english')                       
-# count = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), 
+# count = TfidfVectorizer(analyzer='word', ngram_range=(1, 1), 
 #                         min_df=0, max_df=0.50, 
 #                         stop_words='english')
 
