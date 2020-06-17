@@ -49,7 +49,7 @@ class TwitterMessenger:
         # sample_dev_twitters = [key for key in self.dev_twitter_to_game_list.keys() if len(self.dev_twitter_to_game_list[key]) > 1][:5]
         
         sample_dev_twitters = sorted(self.dev_twitter_to_game_list.keys())
-        sample_dev_twitters = sample_dev_twitters[0:5]
+        sample_dev_twitters = sample_dev_twitters[0:10]
         # sample_dev_twitters = sample_dev_twitters[0:200]
         # sample_dev_twitters = sample_dev_twitters[200:400]
         # sample_dev_twitters = sample_dev_twitters[400:600]
@@ -70,12 +70,13 @@ class TwitterMessenger:
             logging.info(self.dev_twitter_to_game_list[twitter_link])
 
             try :
-                user_twitter_id_str = self.api.get_user(username).id_str
+                # user_twitter_id_str = self.api.get_user(username).id_str
+                user_twitter_id_str = self.api.get_user("vungocquang").id_str
 
                 logging.info("Sending message to user: " + username + " with Twitter user id: " + user_twitter_id_str)
                 logging.info(self.compose_message(twitter_link))
 
-                # api.send_direct_message(user_twitter_id_str, compose_message())
+                self.api.send_direct_message(user_twitter_id_str, self.compose_message(twitter_link))
                 time.sleep(5)
 
             except tweepy.TweepError as err:
@@ -107,9 +108,9 @@ class TwitterMessenger:
         all_eva_links_str = " \n".join(all_eva_links)
 
         msg = "Dear @" + username + ",\n" + \
-            "I am a M.Sc. student in the Analytics of Software, Games and Repository Data (ASGAARD) lab at University of Alberta. For my thesis project, I am working on a recommendation system for Itch.io games based on their similarity to best-selling Steam games. The goal is to help Indie developers with the discoverability of their games - there is no intent to monetize this system.\n" + \
+            "I am a Graduate student in the Analytics of Software, Games and Repository Data (ASGAARD) lab at University of Alberta. For my thesis project, I am working on a recommendation system for Itch.io games based on their similarity to best-selling Steam games. The goal is to help Indie developers with the discoverability of their games - there is no intent to monetize this system.\n" + \
             "I found your Twitter contact details from your Itch.io profile page and would like to invite you to give feedback on our recommendation system. For more official/formal information about the research, please refer to this document https://drive.google.com/file/d/1W_8QmKyJF5JOJuWQUGHXFyTyG_zuXihx/view?usp=sharing\n" + \
-            "I found that you were involved in the development of the following "+ str(len(game_list)) + " game(s): " + all_game_names + ". We would like to ask you to evaluate our matches to 5 popular Steam games for each of your Itch.io games. In the each of the following links (each link corresponds to one of your Itch.io games), please rate all 5 matches by clicking the Thumbs-up icon if you think the match is relevant (in terms of either plot contents, genres, gameplay, etc...) and Thumbs-down otherwise. Please also provide any feedback on the similarity and/or relevance:\n" + \
+            "I found that you were involved in the development of the following "+ str(len(game_list)) + " game(s): " + all_game_names + ". We would like to ask you to evaluate our matches to 5 - 15 popular Steam games for each of your Itch.io games. In each of the following links (each link corresponds to one of your Itch.io games), please rate all matches by clicking the Thumbs-up icon if you think the match is relevant (in terms of either plot contents, genres, gameplay, etc...) and Thumbs-down otherwise. Please also provide any feedback on the similarity and/or relevance:\n" + \
             all_eva_links_str + "\n" + \
             "Note that you can only evaluate the matches of your own games for now. Please keep in mind that this is a fun research project so the matches may be completely wrong or silly :) If so, do not hesitate to let us know via the 'comments' field on the website. We will use your feedback to try and improve the recommendation system.\n" + \
             "We would appreciate it if you could complete the rating within one week of receiving the invitation. Thank you and please let us know if you have any questions.\n" + \
