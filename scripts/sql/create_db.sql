@@ -30,17 +30,11 @@ CREATE TABLE IF NOT EXISTS `rec_ratings`
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
-CREATE TABLE IF NOT EXISTS `dev_twitter_uid`
-(
-	`main_twitter_link` VARCHAR(255),
-    `uid` VARCHAR(64) NOT NULL UNIQUE
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-
 CREATE TABLE IF NOT EXISTS `game_twitter_devs`
 (
 	`game_name` VARCHAR(255),
 	`game_url` VARCHAR(255),
     `main_twitter_link` VARCHAR(255),
-    `uid` VARCHAR(64)
+    `uid` VARCHAR(64),
+    `dev_itch_link` VARCHAR(255),
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

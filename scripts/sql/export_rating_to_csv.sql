@@ -24,14 +24,14 @@ FROM (
 	(SELECT rating.itch_game_url, 
 			rating.steam_game_url,
 			cast(rating.is_upvote AS CHAR),
-			rating.feedback,
-			rating.overall_feedback,
+            REPLACE(rating.feedback, '\n', " ") feedback,
+            REPLACE(rating.overall_feedback, '\n', " ") overall_feedback,
 			cast(rating.u_id AS CHAR),
 			cast(rating.timestamp AS CHAR),
 			cast(rec.sim_scores AS CHAR),
 			2 as which,
             cast(rec.row_id AS CHAR)
-	FROM rec_ratings rating JOIN toprecs rec
+	FROM gamerecs.rec_ratings rating JOIN gamerecs.toprecs rec
 		ON rating.itch_game_url = rec.itch_game_url
 		AND rating.steam_game_url = rec.steam_game_url)
 ) result
@@ -40,8 +40,5 @@ ORDER BY which, -- header comes first
          result.sim_scores + 0.0 DESC, 
          result.row_id ASC,
          result.u_id ASC, 
-         result.timestamp ASC
-INTO OUTFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/ratings_result.csv'
-FIELDS ENCLOSED BY '"' TERMINATED BY ',' ESCAPED BY '"'
-LINES TERMINATED BY '\r\n';
+         result.timestamp ASC;
 
