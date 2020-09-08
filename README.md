@@ -1,0 +1,1 @@
+The downloaded HTML pages of all Itch and top-selling Steam games, and some Itch developer profile pages are uploaded at: https://figshare.com/s/4feb2c921bf0a1bb6e61
