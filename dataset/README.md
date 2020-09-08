@@ -6,7 +6,7 @@
 
 [games_raw.csv](./games_raw.csv): all itch.io games.
 
-[game_details_raw.csv](./game_details_raw.csv): all itch.io games with their metadata.
+[game_details_raw.rar](./game_details_raw.rar): all itch.io games with their metadata.
 
 [df_itch_cleaned.csv](./df_itch_cleaned.csv): 2,830 itch.io games used for analysis.
 
