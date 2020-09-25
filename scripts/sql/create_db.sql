@@ -36,5 +36,5 @@ CREATE TABLE IF NOT EXISTS `game_twitter_devs`
 	`game_url` VARCHAR(255),
     `main_twitter_link` VARCHAR(255),
     `uid` VARCHAR(64),
-    `dev_itch_link` VARCHAR(255),
+    `dev_itch_link` VARCHAR(255)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
